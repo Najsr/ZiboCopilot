@@ -12,8 +12,8 @@
 #endif
 #endif
 #include "XPLMMenus.h"
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #if IBM
 #include <windows.h>
 #endif
@@ -28,7 +28,7 @@
 #include "XPStandardWidgets.h"
 #include "XPLMScenery.h"
 #include "XPLMDataAccess.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 #ifndef XPLM300
 #error This is made to be compiled against the XPLM300 SDK
@@ -74,16 +74,16 @@ PLUGIN_API int XPluginStart(char * outName, char * outSig, char * outDesc)
 
 	g_menu_container_idx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "Copilot Menu", 0, 0);
 	g_menu_id = XPLMCreateMenu("Copilot Menu", XPLMFindPluginsMenu(), g_menu_container_idx, menu_handler, NULL);
-	XPLMAppendMenuItem(g_menu_id, "Powerup Procedure", (void *)"FlightProd_1", 1);
-	XPLMAppendMenuItem(g_menu_id, "Preflight Procedures", (void *)"FlightProd_2", 1);
-	XPLMAppendMenuItem(g_menu_id, "Before Taxi Procedures", (void *)"FlightProd_3", 1);
-	XPLMAppendMenuItem(g_menu_id, "Before Takeoff Procedures", (void *)"FlightProd_4", 1);
-	XPLMAppendMenuItem(g_menu_id, "Clean Up Procedures", (void *)"FlightProd_clean", 1);
-	XPLMAppendMenuItem(g_menu_id, "Shutdown Procedures", (void *)"FlightProd_shutdown", 1);
+	XPLMAppendMenuItem(g_menu_id, "Powerup Procedure", static_cast<void *>("FlightProd_1"), 1);
+	XPLMAppendMenuItem(g_menu_id, "Preflight Procedures", static_cast<void *>("FlightProd_2"), 1);
+	XPLMAppendMenuItem(g_menu_id, "Before Taxi Procedures", static_cast<void *>("FlightProd_3"), 1);
+	XPLMAppendMenuItem(g_menu_id, "Before Takeoff Procedures", static_cast<void *>("FlightProd_4"), 1);
+	XPLMAppendMenuItem(g_menu_id, "Clean Up Procedures", static_cast<void *>("FlightProd_clean"), 1);
+	XPLMAppendMenuItem(g_menu_id, "Shutdown Procedures", static_cast<void *>("FlightProd_shutdown"), 1);
 	XPLMAppendMenuSeparator(g_menu_id);
-	XPLMAppendMenuItem(g_menu_id, "Next Procedure", (void *)"FlightProd_next", 1);
+	XPLMAppendMenuItem(g_menu_id, "Next Procedure", static_cast<void *>("FlightProd_next"), 1);
 
-	XPLMMenuID aircraft_menu = XPLMFindAircraftMenu();
+	const auto aircraft_menu = XPLMFindAircraftMenu();
 	if (aircraft_menu) // This will be NULL unless this plugin was loaded with an aircraft (i.e., it was located in the current aircraft's "plugins" subdirectory)
 	{
 		XPLMAppendMenuItemWithCommand(aircraft_menu, "Toggle Settings (Command-Based)", XPLMFindCommand("sim/operation/toggle_settings_window"));
@@ -110,15 +110,15 @@ PLUGIN_API int XPluginStart(char * outName, char * outSig, char * outDesc)
 
 
 //-------------------------------------------------------- DO NOT TOUCH -----------------------------------------//
-PLUGIN_API void XPluginStop(void)
+PLUGIN_API void XPluginStop()
 {
 	// Since we created this menu, we'll be good citizens and clean it up as well
 	XPLMDestroyMenu(g_menu_id);
 	// If we were able to add a command to the aircraft menu, it will be automatically removed for us when we're unloaded
 }
 
-PLUGIN_API void XPluginDisable(void) { }
-PLUGIN_API int XPluginEnable(void) { return 1; }
+PLUGIN_API void XPluginDisable() { }
+PLUGIN_API int XPluginEnable() { return 1; }
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void * inParam) { }
 //-------------------------------------------------------- END --------------------------------------------------//
 
@@ -126,31 +126,31 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFrom, int inMsg, void * inP
 //-------------------------------------------------------- SUB MENU HANDLER -------------------------------------//
 void menu_handler(void * in_menu_ref, void * in_item_ref)
 {
-	if (!strcmp((const char *)in_item_ref, "FlightProd_1"))
+	if (!strcmp(static_cast<const char *>(in_item_ref), "FlightProd_1"))
 	{
 		startFunction(SubHandler::powerUp);
 	}
-	else if (!strcmp((const char *)in_item_ref, "FlightProd_2"))
+	else if (!strcmp(static_cast<const char *>(in_item_ref), "FlightProd_2"))
 	{
 		startFunction(SubHandler::preFlight);
 	}
-	else if (!strcmp((const char *)in_item_ref, "FlightProd_3"))
+	else if (!strcmp(static_cast<const char *>(in_item_ref), "FlightProd_3"))
 	{
 		startFunction(SubHandler::beforeTaxi);
 	}
-	else if (!strcmp((const char *)in_item_ref, "FlightProd_4"))
+	else if (!strcmp(static_cast<const char *>(in_item_ref), "FlightProd_4"))
 	{
 		startFunction(SubHandler::beforeTaxi);
 	}
-	else if (!strcmp((const char *)in_item_ref, "FlightProd_clean"))
+	else if (!strcmp(static_cast<const char *>(in_item_ref), "FlightProd_clean"))
 	{
 		startFunction(SubHandler::cleanUp);
 	}
-	else if (!strcmp((const char *)in_item_ref, "FlightProd_shutdown"))
+	else if (!strcmp(static_cast<const char *>(in_item_ref), "FlightProd_shutdown"))
 	{
 		startFunction(SubHandler::shutdown);
 	}
-	else if (!strcmp((const char *)in_item_ref, "FlightProd_next"))
+	else if (!strcmp(static_cast<const char *>(in_item_ref), "FlightProd_next"))
 	{
 		doNextProcedure();
 	}
@@ -165,12 +165,12 @@ void startFunction (SubHandler::Procedures procedure) {
 			XPLMSpeakString("Beginning Powerup Procedures");
 			subHandler.procedures[SubHandler::Procedures::powerUp] = true;
 			subHandler.timeElapsed = XPLMGetElapsedTime();
-			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, NULL);
+			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, nullptr);
 		}
 		else {
 			subHandler.ProcedureStage = 0;
 			subHandler.procedures[SubHandler::Procedures::powerUp] = false;
-			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, NULL);
+			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, nullptr);
 		}
 	}
 	else if (procedure == SubHandler::preFlight)
@@ -179,12 +179,12 @@ void startFunction (SubHandler::Procedures procedure) {
 			XPLMSpeakString("Beginning Preflight Procedures");
 			subHandler.procedures[SubHandler::Procedures::preFlight] = true;
 			subHandler.timeElapsed = XPLMGetElapsedTime();
-			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, NULL);
+			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, nullptr);
 		}
 		else {
 			subHandler.ProcedureStage = 0;
 			subHandler.procedures[SubHandler::Procedures::preFlight] = false;
-			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, NULL);
+			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, nullptr);
 		}
 	}
 	else if (procedure == SubHandler::beforeTaxi)
@@ -193,12 +193,12 @@ void startFunction (SubHandler::Procedures procedure) {
 			XPLMSpeakString("Beginning Before Taxi Procedures");
 			subHandler.procedures[SubHandler::Procedures::beforeTaxi] = true;
 			subHandler.timeElapsed = XPLMGetElapsedTime();
-			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, NULL);
+			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, nullptr);
 		}
 		else {
 			subHandler.ProcedureStage = 0;
 			subHandler.procedures[SubHandler::Procedures::beforeTaxi] = false;
-			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, NULL);
+			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, nullptr);
 		}
 	}
 	else if (procedure == SubHandler::beforeTakeOff)
@@ -207,12 +207,12 @@ void startFunction (SubHandler::Procedures procedure) {
 			XPLMSpeakString("Beginning Before Takeoff Procedures");
 			subHandler.procedures[SubHandler::Procedures::beforeTakeOff] = true;
 			subHandler.timeElapsed = XPLMGetElapsedTime();
-			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, NULL);
+			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, nullptr);
 		}
 		else {
 			subHandler.ProcedureStage = 0;
 			subHandler.procedures[SubHandler::Procedures::beforeTakeOff] = false;
-			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, NULL);
+			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, nullptr);
 		}
 	}
 	else if (procedure == SubHandler::cleanUp)
@@ -221,12 +221,12 @@ void startFunction (SubHandler::Procedures procedure) {
 			XPLMSpeakString("Beginning Clean Up Procedures");
 			subHandler.procedures[SubHandler::Procedures::cleanUp] = true;
 			subHandler.timeElapsed = XPLMGetElapsedTime();
-			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, NULL);
+			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, nullptr);
 		}
 		else {
 			subHandler.ProcedureStage = 0;
 			subHandler.procedures[SubHandler::Procedures::cleanUp] = false;
-			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, NULL);
+			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, nullptr);
 		}
 	}
 	else if (procedure == SubHandler::shutdown)
@@ -235,12 +235,12 @@ void startFunction (SubHandler::Procedures procedure) {
 			XPLMSpeakString("Beginning Shutdown Procedures");
 			subHandler.procedures[SubHandler::Procedures::shutdown] = true;
 			subHandler.timeElapsed = XPLMGetElapsedTime();
-			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, NULL);
+			XPLMRegisterFlightLoopCallback(MyFlightLoopCallback, 1.0, nullptr);
 		}
 		else {
 			subHandler.ProcedureStage = 0;
 			subHandler.procedures[SubHandler::Procedures::shutdown] = false;
-			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, NULL);
+			XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, nullptr);
 		}
 	}
 }
@@ -250,13 +250,13 @@ void startFunction (SubHandler::Procedures procedure) {
 static float MyFlightLoopCallback(float inElapsedSinceLastCall, float inElapsedTimeSinceLastFlightLoop, int inCounter, void * inRefcon)
 {
 	/* Elapsed Time */
-	float elapsed = XPLMGetElapsedTime();
+	const auto elapsed = XPLMGetElapsedTime();
 
 	if (!subHandler.doneProcedures) {
 		subHandler.doProcedures(elapsed);
 	}
 	else {
-		XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, NULL);
+		XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, nullptr);
 		subHandler.doneProcedures = false;
 	}
 
